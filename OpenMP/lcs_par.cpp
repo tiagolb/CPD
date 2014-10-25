@@ -7,7 +7,7 @@
 
 /* DEBUG */
 
-//#define DEBUG
+#define DEBUG
 
 /* RETURN CONSTANTS */
 
@@ -52,23 +52,40 @@ void lcsPrintMatrix(std::vector< std::vector<int> > matrix) {
 	}
 }
 
-std::vector< std::vector<int> > lcsPopulateMatrix(std::string seq1, std::string seq2) {
+void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<int> > & matrix,
+					std::string & seq1, std::string & seq2) {
+	if(seq1[i-1] == seq2[j-1]) {
+		matrix[i][j] = matrix[i-1][j-1] + cost(i);
+	} else {
+		matrix[i][j] = std::max(matrix[i-1][j], matrix[i][j-1]);
+	}
+}
+
+std::vector< std::vector<int> > lcsPopulateMatrix(std::string & seq1, std::string & seq2) {
 	size_t rows = seq1.size()+1;
 	size_t cols = seq2.size()+1;
 	std::vector< std::vector<int> > matrix(rows, std::vector<int>(cols, 0));
-	for(size_t i = 1; i < rows; i++) {
-		for(size_t j = 1; j < cols; j++) {
-			if(seq1[i-1] == seq2[j-1]) {
-				matrix[i][j] = matrix[i-1][j-1] + cost(i);
-			} else {
-				matrix[i][j] = std::max(matrix[i-1][j], matrix[i][j-1]);
+	int threads = omp_get_num_threads();
+	int line, col;
+	#pragma omp parallel private(line, col){
+		for(size_t x = 1; x < rows-1; x++) {
+			int jobs = x/threads;
+			int threadID = omp_get_thread_num();
+			col = threadID * jobs;
+			line = x-col;
+			int end = (threadID + 1) * jobs;
+			while(line < end) {
+				calcMatrixCell(line, col, matrix, seq1, seq2);
+				line--;
+				col++;
 			}
 		}
 	}
 	return matrix;
+
 }
 
-std::string lcsFindSubString(std::string seq1, std::string seq2,  std::vector< std::vector<int> > matrix) {
+std::string lcsFindSubString(std::string & seq1, std::string & seq2,  std::vector< std::vector<int> > & matrix) {
 	int row = seq1.size(), col = seq2.size();
 	std::string result = "";
 	while(matrix[row][col] != 0) {
@@ -122,6 +139,10 @@ int main(int argc, char* argv[]) {
 	std::cout << "#META - Sequence1: " << seq1 << std::endl;
 	std::cout << "#META - Sequence2: " << seq2 << std::endl;
 	#endif
+
+	if(seq1.size() > seq2.size()) {
+		seq1.swap(seq2);
+	}
 
 	std::vector< std::vector<int> > matrix = lcsPopulateMatrix(seq1, seq2);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
