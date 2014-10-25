@@ -2,7 +2,7 @@
 # MAKEFILE by Tiago Brito #
 # ----------------------- #
 
-CFLAGS=-Wall -ansi -pedantic -lm
+CFLAGS=-fopenmp -Wall -ansi -pedantic -lm
 CXX=g++
 
 # ------------------------------------------------------------ #

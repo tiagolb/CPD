@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <openmp>
+#include <omp.h>
 
 /* DEBUG */
 
-//#define DEBUG
+#define DEBUG
 
 /* RETURN CONSTANTS */
 
