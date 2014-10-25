@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <openmp>
 
 /* DEBUG */
 
@@ -90,6 +91,9 @@ std::string lcsFindSubString(std::string seq1, std::string seq2,  std::vector< s
 /* MAIN */
 
 int main(int argc, char* argv[]) {
+	#ifdef DEBUG
+	double start = omp_get_wtime();
+	#endif
 	// this line allows for streams to be faster than buffer input
 	std::ios_base::sync_with_stdio (false);
 
@@ -124,6 +128,11 @@ int main(int argc, char* argv[]) {
 	
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
 	std::cout << subString << std::endl;
+
+	#ifdef DEBUG
+	double end = omp_get_wtime();
+	std::cout << "time: " << end - start << std::endl;
+	#endif
 
 	return SUCCESS;
 }
