@@ -124,6 +124,7 @@ int main(int argc, char* argv[]) {
 	#endif
 
 	std::vector< std::vector<int> > matrix = lcsPopulateMatrix(seq1, seq2);
+	lcsPrintMatrix(matrix);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
