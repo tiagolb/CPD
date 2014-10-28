@@ -20,6 +20,9 @@
 #define ARGUMENT 1
 #define PRINT_LIMIT 41
 
+#define FIRST_TRI_OFFSET 2
+#define ZEROS_OFFSET 1
+
 /* FUNCTIONS */
 
 int validateArguments(int argc) {
@@ -69,35 +72,26 @@ std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::
 	
 	#pragma omp parallel
 	{
-		for(size_t diag = 1; diag < lines - 1; diag++) {
+		for(size_t diag = 0; diag < lines - FIRST_TRI_OFFSET; diag++) {
 			#pragma omp for
-			for(size_t line = diag; line > 0; line--) {
-				size_t col = diag - line +1;
-				// #pragma omp critical
-				// std::cout << line << ", " << col << std::endl;
-
+			for(size_t line = diag + ZEROS_OFFSET; line > 0; line--) {
+				size_t col = diag - line + FIRST_TRI_OFFSET;
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
 		}
 
 		for(size_t diag = 0; diag < cols - lines; diag++) {
 			#pragma omp for
-			for(size_t line = lines -1; line > 0; line--) {
+			for(size_t line = lines - ZEROS_OFFSET; line > 0; line--) {
 				size_t col = lines - line + diag;
-				// #pragma omp critical
-				// std::cout << line << ", " << col << std::endl;
-
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
 		}
 
-		for(size_t diag = 0; diag < lines - 1; diag++) {
+		for(size_t diag = 0; diag < lines - ZEROS_OFFSET; diag++) {
 			#pragma omp for
-			for(size_t col = cols - lines + diag + 1; col < cols; col++) {
+			for(size_t col = cols - lines + diag + ZEROS_OFFSET; col < cols; col++) {
 				size_t line = cols - col + diag;
-				// #pragma omp critical
-				// std::cout << line << ", " << col << std::endl;
-
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
 		}
