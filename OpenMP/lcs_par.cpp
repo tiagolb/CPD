@@ -8,6 +8,7 @@
 /* DEBUG */
 
 //#define DEBUG
+#define DEBUG_TIME
 
 /* RETURN CONSTANTS */
 
@@ -72,6 +73,11 @@ std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::
 	
 	#pragma omp parallel
 	{
+		// #ifdef DEBUG_TIME
+		// #pragma omp single
+		// std::cout << omp_get_num_threads() << std::endl;
+		// #endif
+
 		for(size_t diag = 0; diag < lines - FIRST_TRI_OFFSET; diag++) {
 			#pragma omp for
 			for(size_t line = diag + ZEROS_OFFSET; line > 0; line--) {
@@ -107,33 +113,40 @@ std::vector< std::vector<int> > lcsPopulateMatrix_col(std::string & seq1, std::s
 	std::vector< std::vector<int> > matrix(lines, std::vector<int>(cols, 0));
 	
 	#pragma omp parallel
-	for(size_t x = 1; x < cols - 1; x++) {
-		#pragma omp for
-		for(size_t col = x; col > 0; col--) {
-			size_t line = x - col + 1;
-			#pragma omp critical
-			std::cout << line << ", " << col << std::endl;
+	{
+		// #ifdef DEBUG_TIME
+		// #pragma omp single
+		// std::cout << omp_get_num_threads() << std::endl;
+		// #endif
+		
+		for(size_t diag = 0; diag < cols - FIRST_TRI_OFFSET; diag++) {
+			#pragma omp for
+			for(size_t col = diag + ZEROS_OFFSET; col > 0; col--) {
+				size_t line = diag - col + FIRST_TRI_OFFSET;
+				calcMatrixCell(line, col, matrix, seq1, seq2);
+			}
+		}
 
-			calcMatrixCell(line, col, matrix, seq1, seq2);
+		for(size_t diag = 0; diag < lines - cols; diag++) {
+			#pragma omp for
+			for(size_t col = cols - ZEROS_OFFSET; col > 0; col--) {
+				size_t line = cols - col + diag;
+				calcMatrixCell(line, col, matrix, seq1, seq2);
+			}
+		}
+
+		for(size_t diag = 0; diag < cols - ZEROS_OFFSET; diag++) {
+			#pragma omp for
+			for(size_t line = lines - cols + diag + ZEROS_OFFSET; line < lines; line++) {
+				size_t col = lines - line + diag;
+				calcMatrixCell(line, col, matrix, seq1, seq2);
+			}
 		}
 	}
 
 	return matrix;
 
 }
-
-// int jobs = x/threads;
-// 			int threadID = omp_get_thread_num();
-// 			int col = threadID * jobs;
-// 			int line = x-col;
-// 			int end = (threadID + 1) * jobs;
-// 			while(line > 0 && col < end) {
-// 				#pragma omp critical
-// 				std::cout << "line: " << line << ", col: " << col << std::endl;
-// 				calcMatrixCell(line, col, matrix, seq1, seq2);
-// 				line--;
-// 				col++;
-// 			}
 
 /*
 	duas funcoes, uma que ve a matrix pelas linhas quando
@@ -163,7 +176,7 @@ std::string lcsFindSubString(std::string & seq1, std::string & seq2,  std::vecto
 /* MAIN */
 
 int main(int argc, char* argv[]) {
-	#ifdef DEBUG
+	#ifdef DEBUG_TIME
 	double start = omp_get_wtime();
 	#endif
 	// this line allows for streams to be faster than buffer input
@@ -202,13 +215,13 @@ int main(int argc, char* argv[]) {
 		matrix = lcsPopulateMatrix_line(seq1, seq2);
 	}
 	
-	lcsPrintMatrix(matrix);
-	//std::string subString = lcsFindSubString(seq1, seq2, matrix);
+	//lcsPrintMatrix(matrix);
+	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
-	//std::cout << subString << std::endl;
+	std::cout << subString << std::endl;
 
-	#ifdef DEBUG
+	#ifdef DEBUG_TIME
 	double end = omp_get_wtime();
 	std::cout << "time: " << end - start << std::endl;
 	#endif

@@ -7,7 +7,8 @@
 
 /* DEBUG */
 
-#define DEBUG
+//#define DEBUG
+#define DEBUG_TIME
 
 /* RETURN CONSTANTS */
 
@@ -43,7 +44,7 @@ short cost(int x) {
 	return (short) (dcost / n_iter + 0.1);
 }
 
-void lcsPrintMatrix(std::vector< std::vector<int> > matrix) {
+void lcsPrintMatrix(std::vector< std::vector<int> > & matrix) {
 	for(size_t i = 0; i < matrix.size(); i++) {
 		for(size_t j = 0; j < matrix[i].size(); j++) {
 			std::cout << "|" << matrix[i][j];
@@ -52,7 +53,7 @@ void lcsPrintMatrix(std::vector< std::vector<int> > matrix) {
 	}
 }
 
-std::vector< std::vector<int> > lcsPopulateMatrix(std::string seq1, std::string seq2) {
+std::vector< std::vector<int> > lcsPopulateMatrix(std::string & seq1, std::string & seq2) {
 	size_t rows = seq1.size()+1;
 	size_t cols = seq2.size()+1;
 	std::vector< std::vector<int> > matrix(rows, std::vector<int>(cols, 0));
@@ -68,7 +69,8 @@ std::vector< std::vector<int> > lcsPopulateMatrix(std::string seq1, std::string 
 	return matrix;
 }
 
-std::string lcsFindSubString(std::string seq1, std::string seq2,  std::vector< std::vector<int> > matrix) {
+std::string lcsFindSubString(std::string & seq1, std::string & seq2,
+							 std::vector< std::vector<int> > & matrix) {
 	int row = seq1.size(), col = seq2.size();
 	std::string result = "";
 	while(matrix[row][col] != 0) {
@@ -91,7 +93,7 @@ std::string lcsFindSubString(std::string seq1, std::string seq2,  std::vector< s
 /* MAIN */
 
 int main(int argc, char* argv[]) {
-	#ifdef DEBUG
+	#ifdef DEBUG_TIME
 	double start = omp_get_wtime();
 	#endif
 	// this line allows for streams to be faster than buffer input
@@ -124,13 +126,13 @@ int main(int argc, char* argv[]) {
 	#endif
 
 	std::vector< std::vector<int> > matrix = lcsPopulateMatrix(seq1, seq2);
-	lcsPrintMatrix(matrix);
+	//lcsPrintMatrix(matrix);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
 	std::cout << subString << std::endl;
 
-	#ifdef DEBUG
+	#ifdef DEBUG_TIME
 	double end = omp_get_wtime();
 	std::cout << "time: " << end - start << std::endl;
 	#endif
