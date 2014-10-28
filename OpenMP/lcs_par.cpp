@@ -73,8 +73,8 @@ std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::
 			#pragma omp for
 			for(size_t line = diag; line > 0; line--) {
 				size_t col = diag - line +1;
-				#pragma omp critical
-				std::cout << line << ", " << col << std::endl;
+				// #pragma omp critical
+				// std::cout << line << ", " << col << std::endl;
 
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
@@ -84,8 +84,8 @@ std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::
 			#pragma omp for
 			for(size_t line = lines -1; line > 0; line--) {
 				size_t col = lines - line + diag;
-				#pragma omp critical
-				std::cout << line << ", " << col << std::endl;
+				// #pragma omp critical
+				// std::cout << line << ", " << col << std::endl;
 
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
@@ -93,10 +93,10 @@ std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::
 
 		for(size_t diag = 0; diag < lines - 1; diag++) {
 			#pragma omp for
-			for(size_t col = cols - lines; col < cols; col++) {
+			for(size_t col = cols - lines + diag + 1; col < cols; col++) {
 				size_t line = cols - col + diag;
-				#pragma omp critical
-				std::cout << line << ", " << col << std::endl;
+				// #pragma omp critical
+				// std::cout << line << ", " << col << std::endl;
 
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
