@@ -19,7 +19,7 @@ OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 # queremos						#
 # ------------------------------------------------------------ #
 
-PROGRAM=lcs_seq
+PROGRAM=lcs-serial
 
 # ----------------------------------------- #
 # $@ nome da regra que está antes dos :     #
