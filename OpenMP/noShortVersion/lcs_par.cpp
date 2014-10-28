@@ -47,7 +47,7 @@ short cost(int x) {
 	return (short) (dcost / n_iter + 0.1);
 }
 
-void lcsPrintMatrix(std::vector< std::vector<short> > & matrix) {
+void lcsPrintMatrix(std::vector< std::vector<int> > & matrix) {
 	std::cout << "line: " << matrix.size() << ", cols: " << matrix[0].size() << std::endl;
 	for(size_t i = 0; i < matrix.size(); i++) {
 		for(size_t j = 0; j < matrix[i].size(); j++) {
@@ -57,7 +57,7 @@ void lcsPrintMatrix(std::vector< std::vector<short> > & matrix) {
 	}
 }
 
-void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<short> > & matrix,
+void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<int> > & matrix,
 					std::string & seq1, std::string & seq2) {
 	if(seq1[i-1] == seq2[j-1]) {
 		matrix[i][j] = matrix[i-1][j-1] + cost(i);
@@ -66,10 +66,10 @@ void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<short> > & matr
 	}
 }
 
-std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std::string & seq2) {
+std::vector< std::vector<int> > lcsPopulateMatrix_line(std::string & seq1, std::string & seq2) {
 	size_t lines = seq1.size()+1;
 	size_t cols = seq2.size()+1;
-	std::vector< std::vector<short> > matrix(lines, std::vector<short>(cols, 0));
+	std::vector< std::vector<int> > matrix(lines, std::vector<int>(cols, 0));
 	
 	#pragma omp parallel
 	{
@@ -107,10 +107,10 @@ std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std
 
 }
 
-std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std::string & seq2) {
+std::vector< std::vector<int> > lcsPopulateMatrix_col(std::string & seq1, std::string & seq2) {
 	size_t lines = seq1.size()+1;
 	size_t cols = seq2.size()+1;
-	std::vector< std::vector<short> > matrix(lines, std::vector<short>(cols, 0));
+	std::vector< std::vector<int> > matrix(lines, std::vector<int>(cols, 0));
 	
 	#pragma omp parallel
 	{
@@ -118,7 +118,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std:
 		// #pragma omp single
 		// std::cout << omp_get_num_threads() << std::endl;
 		// #endif
-
+		
 		for(size_t diag = 0; diag < cols - FIRST_TRI_OFFSET; diag++) {
 			#pragma omp for
 			for(size_t col = diag + ZEROS_OFFSET; col > 0; col--) {
@@ -153,7 +153,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std:
 	seq1 > seq2 e outra que vê pelas colunas quando seq2 > seq1
 */
 
-std::string lcsFindSubString(std::string & seq1, std::string & seq2,  std::vector< std::vector<short> > & matrix) {
+std::string lcsFindSubString(std::string & seq1, std::string & seq2,  std::vector< std::vector<int> > & matrix) {
 	int row = seq1.size(), col = seq2.size();
 	std::string result = "";
 	while(matrix[row][col] != 0) {
@@ -208,7 +208,7 @@ int main(int argc, char* argv[]) {
 	std::cout << "#META - Sequence2: " << seq2 << std::endl;
 	#endif
 
-	std::vector< std::vector<short> > matrix;
+	std::vector< std::vector<int> > matrix;
 	if(seq1.size() > seq2.size()) {
  		matrix = lcsPopulateMatrix_col(seq1, seq2);
 	} else {

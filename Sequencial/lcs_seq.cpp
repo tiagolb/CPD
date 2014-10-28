@@ -44,7 +44,7 @@ short cost(int x) {
 	return (short) (dcost / n_iter + 0.1);
 }
 
-void lcsPrintMatrix(std::vector< std::vector<int> > & matrix) {
+void lcsPrintMatrix(std::vector< std::vector<short> > & matrix) {
 	for(size_t i = 0; i < matrix.size(); i++) {
 		for(size_t j = 0; j < matrix[i].size(); j++) {
 			std::cout << "|" << matrix[i][j];
@@ -53,10 +53,10 @@ void lcsPrintMatrix(std::vector< std::vector<int> > & matrix) {
 	}
 }
 
-std::vector< std::vector<int> > lcsPopulateMatrix(std::string & seq1, std::string & seq2) {
+std::vector< std::vector<short> > lcsPopulateMatrix(std::string & seq1, std::string & seq2) {
 	size_t rows = seq1.size()+1;
 	size_t cols = seq2.size()+1;
-	std::vector< std::vector<int> > matrix(rows, std::vector<int>(cols, 0));
+	std::vector< std::vector<short> > matrix(rows, std::vector<short>(cols, 0));
 	for(size_t i = 1; i < rows; i++) {
 		for(size_t j = 1; j < cols; j++) {
 			if(seq1[i-1] == seq2[j-1]) {
@@ -70,7 +70,7 @@ std::vector< std::vector<int> > lcsPopulateMatrix(std::string & seq1, std::strin
 }
 
 std::string lcsFindSubString(std::string & seq1, std::string & seq2,
-							 std::vector< std::vector<int> > & matrix) {
+							 std::vector< std::vector<short> > & matrix) {
 	int row = seq1.size(), col = seq2.size();
 	std::string result = "";
 	while(matrix[row][col] != 0) {
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 	std::cout << "#META - Sequence2: " << seq2 << std::endl;
 	#endif
 
-	std::vector< std::vector<int> > matrix = lcsPopulateMatrix(seq1, seq2);
+	std::vector< std::vector<short> > matrix = lcsPopulateMatrix(seq1, seq2);
 	//lcsPrintMatrix(matrix);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
