@@ -69,15 +69,12 @@ void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<short> > & matr
 std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std::string & seq2) {
 	size_t lines = seq1.size()+1;
 	size_t cols = seq2.size()+1;
+	size_t cols_lines = cols - lines;
 	std::vector< std::vector<short> > matrix(lines, std::vector<short>(cols, 0));
 	
 	#pragma omp parallel
 	{
-		// #ifdef DEBUG_TIME
-		// #pragma omp single
-		// std::cout << omp_get_num_threads() << std::endl;
-		// #endif
-
+		
 		for(size_t diag = 0; diag < lines - FIRST_TRI_OFFSET; diag++) {
 			#pragma omp for
 			for(size_t line = diag + ZEROS_OFFSET; line > 0; line--) {
@@ -86,7 +83,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std
 			}
 		}
 
-		for(size_t diag = 0; diag < cols - lines; diag++) {
+		for(size_t diag = 0; diag < cols_lines; diag++) {
 			#pragma omp for
 			for(size_t line = lines - ZEROS_OFFSET; line > 0; line--) {
 				size_t col = lines - line + diag;
@@ -96,7 +93,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std
 
 		for(size_t diag = 0; diag < lines - ZEROS_OFFSET; diag++) {
 			#pragma omp for
-			for(size_t col = cols - lines + diag + ZEROS_OFFSET; col < cols; col++) {
+			for(size_t col = cols_lines + diag + ZEROS_OFFSET; col < cols; col++) {
 				size_t line = cols - col + diag;
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
@@ -110,15 +107,11 @@ std::vector< std::vector<short> > lcsPopulateMatrix_line(std::string & seq1, std
 std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std::string & seq2) {
 	size_t lines = seq1.size()+1;
 	size_t cols = seq2.size()+1;
+	size_t lines_cols = lines - cols;
 	std::vector< std::vector<short> > matrix(lines, std::vector<short>(cols, 0));
 	
 	#pragma omp parallel
 	{
-		// #ifdef DEBUG_TIME
-		// #pragma omp single
-		// std::cout << omp_get_num_threads() << std::endl;
-		// #endif
-
 		for(size_t diag = 0; diag < cols - FIRST_TRI_OFFSET; diag++) {
 			#pragma omp for
 			for(size_t col = diag + ZEROS_OFFSET; col > 0; col--) {
@@ -127,7 +120,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std:
 			}
 		}
 
-		for(size_t diag = 0; diag < lines - cols; diag++) {
+		for(size_t diag = 0; diag < lines_cols; diag++) {
 			#pragma omp for
 			for(size_t col = cols - ZEROS_OFFSET; col > 0; col--) {
 				size_t line = cols - col + diag;
@@ -137,7 +130,7 @@ std::vector< std::vector<short> > lcsPopulateMatrix_col(std::string & seq1, std:
 
 		for(size_t diag = 0; diag < cols - ZEROS_OFFSET; diag++) {
 			#pragma omp for
-			for(size_t line = lines - cols + diag + ZEROS_OFFSET; line < lines; line++) {
+			for(size_t line = lines_cols + diag + ZEROS_OFFSET; line < lines; line++) {
 				size_t col = lines - line + diag;
 				calcMatrixCell(line, col, matrix, seq1, seq2);
 			}
