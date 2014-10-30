@@ -144,6 +144,12 @@ int main(int argc, char* argv[]) {
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
 	std::cout << subString << std::endl;
 
+	for(size_t i = 0; i < lines; i++) {
+		delete matrix[i];
+	}
+	delete matrix;
+
+
 	#ifdef DEBUG_TIME
 	double end = omp_get_wtime();
 	std::cout << "time: " << end - start << std::endl;

@@ -282,6 +282,12 @@ int main(int argc, char* argv[]) {
 	printf("%d\n", matrix[seq1.size()][seq2.size()]);
 	printf("%s\n", subString.c_str());
 
+	#pragma omp parallel for
+	for(size_t i = 0; i < lines; i++) {
+		delete matrix[i];
+	}
+	delete matrix;
+
 	#ifdef DEBUG_TIME
 	double end = omp_get_wtime();
 	std::cout << "time: " << end - start << std::endl;
