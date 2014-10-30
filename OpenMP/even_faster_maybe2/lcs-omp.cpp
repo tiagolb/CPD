@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
 			matrix[i][0] = 0;
 		}
 
-		#pragma omp for
+		#pragma omp for nowait
 		for(size_t i = 1; i < cols; i++) {
 			matrix[0][i] = 0;
 		}
@@ -276,8 +276,11 @@ int main(int argc, char* argv[]) {
 	//lcsPrintMatrix(matrix, lines, cols);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
-	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
-	std::cout << subString << std::endl;
+	// std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
+	// std::cout << subString << std::endl;
+
+	printf("%d\n", matrix[seq1.size()][seq2.size()]);
+	printf("%s\n", subString.c_str());
 
 	#ifdef DEBUG_TIME
 	double end = omp_get_wtime();
