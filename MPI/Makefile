@@ -2,8 +2,8 @@
 # MAKEFILE by Tiago Brito #
 # ----------------------- #
 
-CFLAGS=-fopenmp -Wall -ansi -pedantic -lm
-CXX=g++
+CFLAGS=-Wall -ansi -lm
+CXX=mpicxx
 
 # ------------------------------------------------------------ #
 # patsubst - substitui para todos os *.cpp - $(wildcard *.cpp) #
