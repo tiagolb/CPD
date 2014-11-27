@@ -8,7 +8,7 @@
 /* DEBUG */
 
 //#define DEBUG
-#define DEBUG_TIME
+//#define DEBUG_TIME
 
 /* RETURN CONSTANTS */
 
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
 	#endif
 
 	std::vector< std::vector<short> > matrix = lcsPopulateMatrix(seq1, seq2);
-	//lcsPrintMatrix(matrix);
+	lcsPrintMatrix(matrix);
 	std::string subString = lcsFindSubString(seq1, seq2, matrix);
 	
 	std::cout << matrix[seq1.size()][seq2.size()] << std::endl;
