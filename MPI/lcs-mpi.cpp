@@ -22,6 +22,12 @@
 #define ARGUMENT 1
 #define PRINT_LIMIT 41
 
+#define FIRST_TRI_OFFSET 2
+#define ZEROS_OFFSET 1
+#define SEND_OFFSET 1
+
+#define FIRST_TRI_MIDDLE_OFFSET 1
+
 /* FUNCTIONS */
 
 int validateArguments(int argc) {
@@ -61,28 +67,154 @@ void calcMatrixCell(size_t i, size_t j, std::vector< std::vector<short> > & matr
 	}
 }
 
-void lcsPopulateMatrixFirstCalc_col(std::vector< std::vector<short> > & matrix,
+void calcAndSendMatrixCell(int sendToId, size_t i, size_t j, std::vector< std::vector<short> > & matrix,
+					std::string & seq1, std::string & seq2) {
+	if(seq1[i-1] == seq2[j-1]) {
+		matrix[i][j] = matrix[i-1][j-1] + cost(i);
+	} else {
+		matrix[i][j] = std::max(matrix[i-1][j], matrix[i][j-1]);
+	}
+
+	// MPI_Send(matrix[i][j], sendToId);
+}
+
+void calcAndReceiveMatrixCell(int receiveFromId, size_t i, size_t j, std::vector< std::vector<short> > & matrix,
+					std::string & seq1, std::string & seq2) {
+	if(seq1[i-1] == seq2[j-1]) {
+		matrix[i][j] = matrix[i-1][j-1] + cost(i);
+	} else {
+		matrix[i][j] = std::max(matrix[i-1][j], matrix[i][j-1]);
+	}
+
+	// MPI_Recv(matrix[i][j], receiveFromId);
+}
+
+void lcsPopulateMatrixFirstCalc_col(int id, std::vector< std::vector<short> > & matrix,
+									std::string & seq1, std::string & seq2) {
+	size_t lines = matrix.size();
+	size_t cols = matrix[0].size();
+	size_t lines_cols = lines - cols;
+	for(size_t diag = 0; diag < cols - FIRST_TRI_OFFSET; diag++) {
+		for(size_t col = diag + ZEROS_OFFSET; col > 0; col--) {
+			size_t line = diag - col + FIRST_TRI_OFFSET;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+
+	for(size_t diag = 0; diag < lines_cols; diag++) {
+		// para enviar como isto esta a descer a diagonal em vez de subir e' a
+		// primeira celula calculada de cada diagonal que tem que ser enviada
+		size_t col = cols - ZEROS_OFFSET;
+		size_t line = cols - col + diag;
+		calcAndSendMatrixCell(id+1, line, col, matrix, seq1, seq2);
+		for(size_t col = cols - ZEROS_OFFSET - SEND_OFFSET; col > 0; col--) {
+			size_t line = cols - col + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+
+	for(size_t diag = 0; diag < cols - ZEROS_OFFSET; diag++) {
+		// para enviar como isto esta a descer a diagonal em vez de subir e' a
+		// primeira celula calculada de cada diagonal que tem que ser enviada
+		size_t line = lines_cols + diag + ZEROS_OFFSET;
+		size_t col = lines - line + diag;
+		calcAndSendMatrixCell(id+1, line, col, matrix, seq1, seq2);
+		for(size_t line = lines_cols + diag + ZEROS_OFFSET + SEND_OFFSET; line < lines; line++) {
+			size_t col = lines - line + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+}
+
+void lcsPopulateMatrixMiddleCalc_col(int id, std::vector< std::vector<short> > & matrix,
+									std::string & seq1, std::string & seq2) {
+	size_t lines = matrix.size();
+	size_t cols = matrix[0].size();
+	size_t lines_cols = lines - cols;
+	for(size_t diag = 0; diag < cols - FIRST_TRI_MIDDLE_OFFSET; diag++) {
+		// Aqui so' precisa de receber
+		for(size_t col = diag; col > 0; col--) {
+			size_t line = diag - col + FIRST_TRI_MIDDLE_OFFSET;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+		// Aqui resta quando a coluna == 0 que e' quando queremos receber
+		//size_t col = 0;
+		//size_t line = diag + FIRST_TRI_MIDDLE_OFFSET;
+		//calcAndReceiveMatrixCell(id-1, line, col, matrix, seq1, seq2);
+	}
+
+	for(size_t diag = 0; diag < lines_cols; diag++) {
+		// Aqui precisa de receber e enviar
+		for(size_t col = cols - ZEROS_OFFSET; col > 0; col--) {
+			size_t line = cols - col + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+
+	for(size_t diag = 0; diag < cols - ZEROS_OFFSET; diag++) {
+		// Aqui so' precisa de enviar
+		for(size_t line = lines_cols + diag + ZEROS_OFFSET; line < lines; line++) {
+			size_t col = lines - line + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+}
+
+void lcsPopulateMatrixLastCalc_col(int id, std::vector< std::vector<short> > & matrix,
 									std::string & seq1, std::string & seq2) {
 }
 
-void lcsPopulateMatrixMiddleCalc_col(std::vector< std::vector<short> > & matrix,
+void lcsPopulateMatrixFirstCalc_line(int id, std::vector< std::vector<short> > & matrix,
+									std::string & seq1, std::string & seq2) {
+
+	size_t lines = matrix.size();
+	size_t cols = matrix[0].size();
+	size_t cols_lines = cols - lines;
+
+	for(size_t diag = 0; diag < lines - FIRST_TRI_OFFSET; diag++) {
+		for(size_t line = diag + ZEROS_OFFSET; line > 0; line--) {
+			size_t col = diag - line + FIRST_TRI_OFFSET;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+
+	for(size_t diag = 0; diag < cols_lines; diag++) {
+		for(size_t line = lines - ZEROS_OFFSET; line > 0; line--) {
+			size_t col = lines - line + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+	}
+
+	for(size_t diag = 0; diag < lines - ZEROS_OFFSET; diag++) {
+		for(size_t col = cols_lines + diag + ZEROS_OFFSET; col < cols - SEND_OFFSET; col++) {
+			size_t line = cols - col + diag;
+			calcMatrixCell(line, col, matrix, seq1, seq2);
+		}
+		// para enviar como isto esta a subir a diagonal em vez de subir e' a
+		// primeira celula calculada de cada diagonal que tem que ser enviada
+		size_t col = cols - SEND_OFFSET;
+		size_t line = cols - col + diag;
+		calcAndSendMatrixCell(id+1, line, col, matrix, seq1, seq2);
+	}
+}
+
+void lcsPopulateMatrixMiddleCalc_line(int id, std::vector< std::vector<short> > & matrix,
 									std::string & seq1, std::string & seq2) {
 }
 
-void lcsPopulateMatrixLastCalc_col(std::vector< std::vector<short> > & matrix,
+void lcsPopulateMatrixLastCalc_line(int id, std::vector< std::vector<short> > & matrix,
 									std::string & seq1, std::string & seq2) {
 }
 
-void lcsPopulateMatrixFirstCalc_line(std::vector< std::vector<short> > & matrix,
-									std::string & seq1, std::string & seq2) {
-}
+/* PRINT */
 
-void lcsPopulateMatrixMiddleCalc_line(std::vector< std::vector<short> > & matrix,
-									std::string & seq1, std::string & seq2) {
-}
-
-void lcsPopulateMatrixLastCalc_line(std::vector< std::vector<short> > & matrix,
-									std::string & seq1, std::string & seq2) {
+void lcsPrintMatrix(std::vector< std::vector<short> > & matrix) {
+	for(size_t i = 0; i < matrix.size(); i++) {
+		for(size_t j = 0; j < matrix[i].size(); j++) {
+			std::cout << "|" << matrix[i][j];
+		}
+		std::cout << "|" << std::endl;
+	}
 }
 
 /* MAIN */
@@ -146,22 +278,23 @@ int main(int argc, char* argv[]) {
 
     if(id == 0) {
     	if(seq1.size() > substring.size()) {
- 			lcsPopulateMatrixFirstCalc_col(matrix, seq1, substring);
+ 			lcsPopulateMatrixFirstCalc_col(id, matrix, seq1, substring);
+ 			lcsPrintMatrix(matrix);
 		} else {
-			lcsPopulateMatrixFirstCalc_line(matrix, seq1, substring);
+			lcsPopulateMatrixFirstCalc_line(id, matrix, seq1, substring);
 		}
 
     } if (id == p-1) {
     	if(seq1.size() > substring.size()) {
- 			lcsPopulateMatrixLastCalc_col(matrix, seq1, substring);
+ 			lcsPopulateMatrixLastCalc_col(id, matrix, seq1, substring);
 		} else {
-			lcsPopulateMatrixLastCalc_line(matrix, seq1, substring);
+			lcsPopulateMatrixLastCalc_line(id, matrix, seq1, substring);
 		}
     } else {
     	if(seq1.size() > substring.size()) {
- 			lcsPopulateMatrixMiddleCalc_col(matrix, seq1, substring);
+ 			lcsPopulateMatrixMiddleCalc_col(id, matrix, seq1, substring);
 		} else {
-			lcsPopulateMatrixMiddleCalc_line(matrix, seq1, substring);
+			lcsPopulateMatrixMiddleCalc_line(id, matrix, seq1, substring);
 		}
     }
 
