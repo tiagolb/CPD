@@ -2,7 +2,7 @@
 # MAKEFILE by Tiago Brito #
 # ----------------------- #
 
-CFLAGS=-Wall -ansi -lm
+CFLAGS=-Wall -ansi -lm -g
 CXX=mpicxx
 
 # ------------------------------------------------------------ #

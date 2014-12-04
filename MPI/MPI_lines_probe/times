@@ -1,9 +1,8 @@
 TODOS os tempos para o processo 0 (e' o que apresenta os resultados por isso e' o ultimo a acabar)
 Tempos de correr 10.15.in no cluster
-4 maquinas - 
-6 maquinas - 
-8 maquinas - 
-15 maquinas - 
+4 maquinas - 1.368 segundos
+6 maquinas - 1.383 segundos
+8 maquinas - 1.61 segundos 
 
 Tempos de correr 150.200.in no cluster
 4 maquinas - 0.108 segundos
@@ -11,10 +10,6 @@ Tempos de correr 150.200.in no cluster
 8 maquinas - 0.132 segundos
 16 maquinas - 0.19 segundos 
 24 maquinas - 0.34 segundos 
-32 maquinas -
-64 maquinas -
-128 maquinas -
-200 maquinas -
 
 Tempos de correr 3k.8k.in no cluster
 4 maquinas - 2.8 segundos
@@ -22,10 +17,6 @@ Tempos de correr 3k.8k.in no cluster
 8 maquinas - 1.7 segundos
 16 maquinas - 1.2 segundos
 24 maquinas - 0.99 segundos
-32 maquinas -
-64 maquinas -
-128 maquinas -
-256 maquinas -
 
 Tempos de correr 18k.17k.in no cluster
 4 maquinas - 40 segundos
@@ -33,10 +24,6 @@ Tempos de correr 18k.17k.in no cluster
 8 maquinas - 18 segundos
 16 maquinas - 11.3 segundos
 24 maquinas - 7.5 segundos 
-32 maquinas -
-64 maquinas -
-128 maquinas -
-256 maquinas -
 
 Tempos de correr 48k.30k.in no cluster
 4 maquinas - 162.23 segundos
@@ -44,10 +31,6 @@ Tempos de correr 48k.30k.in no cluster
 8 maquinas - 85.1 segundos 
 16 maquinas - 44.02 segundos 
 24 maquinas - 31.37 segundos 
-32 maquinas -
-64 maquinas -
-128 maquinas -
-256 maquinas -
 
 Dependendo da altura do dia podem estar disponiveis entre 40 a 360 cores
 Sugiro que durante a noite se meta a correr um exemplo com centenas de cores para termos esse tempo para referencia de escalabilidade

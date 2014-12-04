@@ -8,7 +8,7 @@
 /* DEBUG */
 
 //#define DEBUG
-//#define DEBUG_TIME
+#define DEBUG_TIME
 
 /* RETURN CONSTANTS */
 

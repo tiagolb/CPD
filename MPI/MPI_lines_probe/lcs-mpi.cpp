@@ -222,6 +222,45 @@ void lcsFindSubStringLastSlave(int id, std::string & seq1, std::string & seq2,
 	MPI_Send(buffer, result.size()+1, MPI_CHAR, 0, id, MPI_COMM_WORLD);
 }
 
+/* ONE */
+
+short lcsPopulateMatrixOne(std::vector< std::vector<short> > & matrix,
+					   		 std::string & seq1, std::string & seq2) {
+	size_t rows = seq1.size()+1;
+	size_t cols = seq2.size()+1;
+	for(size_t i = 1; i < rows; i++) {
+		for(size_t j = 1; j < cols; j++) {
+			if(seq1[i-1] == seq2[j-1]) {
+				matrix[i][j] = matrix[i-1][j-1] + cost(i);
+			} else {
+				matrix[i][j] = std::max(matrix[i-1][j], matrix[i][j-1]);
+			}
+		}
+	}
+	return matrix[rows-1][cols-1];
+}
+
+std::string lcsFindSubStringOne(std::string & seq1, std::string & seq2,
+						  std::vector< std::vector<short> > & matrix) {
+	int row = seq1.size(), col = seq2.size();
+	std::string result = "";
+	while(matrix[row][col] != 0) {
+		if(seq1[row-1] == seq2[col-1]) {
+			result.insert(result.begin(), seq1[row-1]);
+			row--;
+			col--;
+		} else {
+			if(matrix[row-1][col] > matrix[row][col-1]) {
+				row--;
+			} else {
+				col--;
+			}
+		}
+	}
+
+ 	return result;
+}
+
 /* PRINT */
 
 void lcsPrintMatrix(std::vector< std::vector<short> > & matrix) {
@@ -283,40 +322,52 @@ int main(int argc, char* argv[]) {
     #endif
 
     std::string substring;
-    char * buffer;
     MPI_Status status;
 
-    if(id == 0) {
-	    int first_start = id * seq2.size() / p;
-	    int first_end = (id+1) * seq2.size() / p;
-	    substring = seq2.substr(first_start, first_end - first_start);
+    if(p != 1) {
+    	if(id == 0) {
+		    int first_start = id * seq2.size() / p;
+		    int first_end = (id+1) * seq2.size() / p;
+		    substring = seq2.substr(first_start, first_end - first_start);
 
-	    int istart, iend;
-	    for(int i = 1; i < p; i++) {
-	    	istart = i * seq2.size() / p;
-	    	iend = (i+1) * seq2.size() / p;
-	    	if(i == p-1) {
-	    		iend = seq2.size();
-	    	}
-	    	std::string sendSubstring = seq2.substr(istart, iend - istart);
-	    	buffer = new char[sendSubstring.size()+1];
-			sendSubstring.copy(buffer, sendSubstring.size(), 0);
-			buffer[sendSubstring.size()] = '\0';
-			MPI_Send(buffer, sendSubstring.size()+1, MPI_CHAR, i, i, MPI_COMM_WORLD);
-	    } 
-    } else {
-    	int len = 0;
-		MPI_Probe(0, id, MPI_COMM_WORLD, &status);
-		MPI_Get_count(&status, MPI_CHAR, &len);
-		buffer = new char[len];
-		MPI_Recv(buffer, len, MPI_CHAR, 0, id, MPI_COMM_WORLD, &status);
-		substring = std::string(buffer);
-    }
-    delete buffer;
+		    int istart, iend;
+		    for(int i = 1; i < p; i++) {
+		    	char * buffer;
+		    	istart = i * seq2.size() / p;
+		    	iend = (i+1) * seq2.size() / p;
+		    	if(i == p-1) {
+		    		iend = seq2.size();
+		    	}
+		    	std::string sendSubstring = seq2.substr(istart, iend - istart);
+		    	buffer = new char[sendSubstring.size()+1];
+				sendSubstring.copy(buffer, sendSubstring.size(), 0);
+				buffer[sendSubstring.size()] = '\0';
+				MPI_Send(buffer, sendSubstring.size()+1, MPI_CHAR, i, i, MPI_COMM_WORLD);
+				delete buffer;
+		    } 
+	    } else {
+	    	char * buffer;
+	    	int len = 0;
+			MPI_Probe(0, id, MPI_COMM_WORLD, &status);
+			MPI_Get_count(&status, MPI_CHAR, &len);
+			buffer = new char[len];
+			MPI_Recv(buffer, len, MPI_CHAR, 0, id, MPI_COMM_WORLD, &status);
+			substring = std::string(buffer);
+			delete buffer;
+	    }
+	} else {
+		substring = seq2;
+	}
 
     std::vector< std::vector<short> > matrix = lcsBuildMatrix(id, seq1.size(), substring.size());
 
-    if(id == 0) {
+    if(p == 1) {
+    	short result = lcsPopulateMatrixOne(matrix, seq1, seq2);
+    	std::string resultSubstring = lcsFindSubStringOne(seq1, seq2, matrix);
+
+    	std::cout << result << std::endl;
+    	std::cout << resultSubstring << std::endl;
+    } else if(id == 0) {
     	short result = lcsPopulateMatrixFirst(id, p-1, matrix, seq1, substring);
     	std::string resultSubstring = lcsFindSubStringMaster(p, id, seq1, substring, matrix);
 
